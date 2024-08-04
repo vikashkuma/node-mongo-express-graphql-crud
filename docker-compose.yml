@@ -1,0 +1,50 @@
+version: '3.7'
+
+services:
+  mongo:
+    image: mongo
+    volumes:
+      - data-volume:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: graphQl
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: myapp-backend
+    container_name: myapp-node-backend
+    command: npm start
+    depends_on:
+      - mongo
+    ports:
+      - "5012:5001"
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: myapp-frontend
+    container_name: myapp-react-frontend
+    command: npm start
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    data-volume:
+    web-root:
+      driver: local
